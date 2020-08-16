@@ -115,9 +115,13 @@ void push_back(Strings* list, String val) {
 
 // search
 String front(Strings* list) {
+    assert(list != NULL);
+
     return list->first->value;
 }
 String back(Strings* list) {
+    assert(list != NULL);
+
     StringNode* last_valid = list->last->previous;
 
     return last_valid != NULL ? last_valid->value : NULL;
@@ -126,11 +130,14 @@ String back(Strings* list) {
 
 // deletion
 void pop_front(Strings* list) {
-    // nothing to pop
+    assert(list != NULL);
+
+    // empty list
     if(list->first == list->last) return;
 
     StringNode* newFirst = list->first->next;
 
+    // at most will be list->last (safe to dereference)
     newFirst->previous = NULL;
 
     list->first = newFirst;
@@ -138,6 +145,8 @@ void pop_front(Strings* list) {
     --(list->length);
 }
 void pop_back(Strings* list) {
+    assert(list != NULL);
+
     // nothing to pop
     if(list->last->previous == NULL) return;
 
@@ -206,6 +215,3 @@ void testStrings() {
     freeList(list);
 }
 // end tests
-
-
-
