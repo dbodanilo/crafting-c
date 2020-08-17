@@ -35,6 +35,15 @@ String stringFromInt(int val) {
 
     return s;
 }
+
+String stringFromChar(char val) {
+    size_t len = 2;
+
+    String s = newString(len);
+    sprintf(s, "%c", val);
+
+    return s;
+}
 // end String
 
 // StringNode
@@ -51,13 +60,14 @@ StringNode* newStringNode(String val, StringNode* prev, StringNode* next) {
 void freeStringNode(StringNode* node) {
     if(node == NULL) return;
 
-    free(node->value);
+    // cracks if same string pointer is shared between nodes
+//    free(node->value);
     free(node);
 }
 // end StringNode
 
 // Strings
-Strings* newList() {
+Strings* newStringList() {
     Strings* list = malloc(sizeof(Strings));
 
     list->last = newStringNode(NULL, NULL, NULL);
@@ -69,19 +79,18 @@ Strings* newList() {
     return list;
 }
 
-void freeList(Strings* list) {
+void freeStringList(Strings* list) {
     if(list == NULL) return;
 
-    while(list->length > 0) pop_front(list);
+    while(list->length > 0) pop_front_string(list);
 
-    freeStringNode(list->first);
     freeStringNode(list->last);
 
     free(list);
 }
 
 // insertion
-void push_front(Strings* list, String val) {
+void push_front_string(Strings* list, String val) {
     assert(list != NULL);
 
     StringNode* prev = NULL;
@@ -95,7 +104,7 @@ void push_front(Strings* list, String val) {
 
     ++(list->length);
 }
-void push_back(Strings* list, String val) {
+void push_back_string(Strings* list, String val) {
     assert(list != NULL);
 
     StringNode* prev = list->last->previous;
@@ -114,12 +123,12 @@ void push_back(Strings* list, String val) {
 // end insertion
 
 // search
-String front(Strings* list) {
+String front_string(Strings* list) {
     assert(list != NULL);
 
     return list->first->value;
 }
-String back(Strings* list) {
+String back_string(Strings* list) {
     assert(list != NULL);
 
     StringNode* last_valid = list->last->previous;
@@ -129,7 +138,7 @@ String back(Strings* list) {
 // end search
 
 // deletion
-void pop_front(Strings* list) {
+void pop_front_string(Strings* list) {
     assert(list != NULL);
 
     // empty list
@@ -144,7 +153,7 @@ void pop_front(Strings* list) {
 
     --(list->length);
 }
-void pop_back(Strings* list) {
+void pop_back_string(Strings* list) {
     assert(list != NULL);
 
     // nothing to pop
@@ -153,6 +162,7 @@ void pop_back(Strings* list) {
     StringNode* newLast = list->last->previous->previous;
 
     list->last->previous = newLast;
+
     if(newLast != NULL) newLast->next = list->last;
     // now empty list
     else list->first = list->last;
@@ -163,32 +173,34 @@ void pop_back(Strings* list) {
 // end Strings
 
 // tests
-void testStrings() {
-    Strings* list = newList();
+void testStringList() {
+    puts("test string list");
+
+    Strings* list = newStringList();
 
     int len = 10;
 
     // insertions
     // front
     for(int i = 0; i < len/2; ++i) {
-        String s = stringFromInt(i+1);
+        String s = stringFromChar('a' + i);
 
-        push_front(list, s);
+        push_front_string(list, s);
 
         // search
-        String first = front(list);
+        String first = front_string(list);
         assert(strcmp(first, s) == 0);
 
         printf("pushed front: %s\n", first);
     }
     // back
     for(int i = len/2; i < len; ++i) {
-        String s = stringFromInt(i+1);
+        String s = stringFromChar('Z' - i);
 
-        push_back(list, s);
+        push_back_string(list, s);
 
         // search
-        String last = back(list);
+        String last = back_string(list);
         assert(strcmp(last, s) == 0);
 
         printf("pushed back: %s\n", last);
@@ -198,20 +210,22 @@ void testStrings() {
     // deletions
     // back
     while(list->length > len/2) {
-        String val = back(list);
-        pop_back(list);
+        String val = back_string(list);
+        pop_back_string(list);
 
         printf("popped back: %s\n", val);
     }
     // front
     while(list->length > 0) {
-        String val = front(list);
-        pop_front(list);
+        String val = front_string(list);
+        pop_front_string(list);
 
         printf("popped front: %s\n", val);
     }
     assert(list->length == 0);
 
-    freeList(list);
+    freeStringList(list);
+
+    puts("end test string list");
 }
 // end tests
