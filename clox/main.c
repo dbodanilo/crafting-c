@@ -9,10 +9,14 @@
 #include "vm.h"
 
 /* 
+  2021-07-15
+    - 17.5 | Parsing Infix Expressions
+
+  2021-07-10
+    - 17 | Compiling Expressions
 
   2021-07-05
     - 16.3 | A Lexical Grammar for Lox
-
 */
 
 static void repl() {
@@ -32,7 +36,7 @@ static void repl() {
 static char* readFile(const char* path) {
   FILE* file = fopen(path, "rb");
   if (file == NULL) {
-    fprint(stderr, "Could not open file \"%s\".\n", path);
+    fprintf(stderr, "Could not open file \"%s\".\n", path);
     exit(74);
   }
   
