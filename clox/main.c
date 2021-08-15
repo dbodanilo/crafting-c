@@ -9,6 +9,12 @@
 #include "vm.h"
 
 /* 
+  2021-08-14
+    - 19 | Strings
+
+  2021-08-12
+    - 17.6.1 | Parsing with precedence
+
   2021-07-15
     - 17.5 | Parsing Infix Expressions
 
