@@ -9,6 +9,10 @@
 #include "vm.h"
 
 /* 
+  2021-08-21
+    - 19 | Strings
+
+
   2021-08-14
     - 19 | Strings
 
