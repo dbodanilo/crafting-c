@@ -4,7 +4,7 @@ LFLAGS   =
 LIBS     = 
 OBJFILES = main.o chunk.o debug.o vm.o \
 value.o memory.o compiler.o object.o \
-scanner.o 
+scanner.o table.o 
 
 MAIN     = clox
 

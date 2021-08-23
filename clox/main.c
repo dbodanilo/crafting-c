@@ -9,9 +9,12 @@
 #include "vm.h"
 
 /* 
+  2021-08-22
+    - 20 | Hash Tables
+
+
   2021-08-21
     - 19 | Strings
-
 
   2021-08-14
     - 19 | Strings
