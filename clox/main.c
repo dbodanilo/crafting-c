@@ -9,9 +9,11 @@
 #include "vm.h"
 
 /* 
+  2022-08-30
+    - 24.3.3 | The call stack
+
   2021-08-22
     - 20 | Hash Tables
-
 
   2021-08-21
     - 19 | Strings

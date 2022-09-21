@@ -18,7 +18,7 @@ typedef struct {
 } Parser;
 
 typedef enum {
-  PREC_NONE, 
+  PREC_NONE,
   PREC_ASSIGNMENT, // =
   PREC_OR,         // or
   PREC_AND,        // and
@@ -40,22 +40,29 @@ typedef struct {
 } ParseRule;
 
 typedef struct {
-  Token name; 
-  int depth; 
-} Local; 
+  Token name;
+  int depth;
+} Local;
+
+typedef enum {
+  TYPE_FUNCTION,
+  TYPE_SCRIPT
+} FunctionType;
 
 typedef struct {
+  ObjFunction* function;
+  FunctionType type;
+
   Local locals[UINT8_COUNT];
-  int localCount; 
-  int scopeDepth; 
+  int localCount;
+  int scopeDepth;
 } Compiler;
 
 Parser parser;
 Compiler* current = NULL;
-Chunk* compilingChunk;
 
 static Chunk* currentChunk() {
-  return compilingChunk;
+  return &current->function->chunk;
 }
 
 static void errorAt(Token* token, const char* message) {
@@ -174,20 +181,32 @@ static void patchJump(int offset) {
   currentChunk()->code[offset + 1] = jump & 0xff;
 }
 
-static void initCompiler(Compiler* compiler) {
-  compiler->localCount = 0; 
-  compiler->scopeDepth = 0; 
+static void initCompiler(Compiler* compiler, FunctionType type) {
+  compiler->function = NULL;
+  compiler->type = type;
+  compiler->localCount = 0;
+  compiler->scopeDepth = 0;
+  compiler->function = newFunction();
   current = compiler;
+
+  Local* local = &current->locals[current->localCount++];
+  local->depth = 0;
+  local->name.start = "";
+  local->name.length = 0;
 }
 
-static void endCompiler() {
+static ObjFunction* endCompiler() {
   emitReturn();
+  ObjFunction* function = current->function;
 
 #ifdef DEBUG_PRINT_CODE
   if (!parser.hadError) {
-    disassembleChunk(currentChunk(), "code");
+    disassembleChunk(currentChunk(), function->name != NULL ?
+        function->name->chars : "<script>");
   }
 #endif
+
+  return function;
 }
 
 static void beginScope() {
@@ -197,8 +216,8 @@ static void beginScope() {
 static void endScope() {
   current->scopeDepth--;
 
-  while (current->localCount > 0 && 
-	 current->locals[current->localCount - 1].depth > 
+  while (current->localCount > 0 &&
+	 current->locals[current->localCount - 1].depth >
 	     current->scopeDepth) {
     emitByte(OP_POP);
     current->localCount--;
@@ -255,7 +274,7 @@ static void expression() {
 // block     -> "{" declaration* "}" ;
 static void block() {
   while(!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
-    declaration(); 
+    declaration();
   }
 
   consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
@@ -263,14 +282,14 @@ static void block() {
 
 static void varDeclaration() {
   uint8_t global = parseVariable("Expect variable name.");
-  
+
   if (match(TOKEN_EQUAL)) {
     expression();
   } else {
     emitByte(OP_NIL);
   }
 
-  consume(TOKEN_SEMICOLON, 
+  consume(TOKEN_SEMICOLON,
           "Expect ';' after variable declaration.");
 
   defineVariable(global);
@@ -315,11 +334,10 @@ static void forStatement() {
     loopStart = incrementStart;
     patchJump(bodyJump);
   }
-	  
 
   statement();
   emitLoop(loopStart);
-  
+
   if (exitJump != -1) {
     patchJump(exitJump);
     emitByte(OP_POP); // Condition.
@@ -360,7 +378,7 @@ static void whileStatement() {
 
   int exitJump = emitJump(OP_JUMP_IF_FALSE);
   emitByte(OP_POP);
-  statement(); 
+  statement();
   emitLoop(loopStart);
 
   patchJump(exitJump);
@@ -373,17 +391,17 @@ static void synchronize() {
   while (parser.current.type != TOKEN_EOF) {
     if (parser.previous.type == TOKEN_SEMICOLON) return;
     switch (parser.current.type) {
-      case TOKEN_CLASS: 
-      case TOKEN_FUN: 
-      case TOKEN_VAR: 
-      case TOKEN_FOR: 
-      case TOKEN_IF: 
-      case TOKEN_WHILE: 
-      case TOKEN_PRINT: 
-      case TOKEN_RETURN: 
+      case TOKEN_CLASS:
+      case TOKEN_FUN:
+      case TOKEN_VAR:
+      case TOKEN_FOR:
+      case TOKEN_IF:
+      case TOKEN_WHILE:
+      case TOKEN_PRINT:
+      case TOKEN_RETURN:
         return;
 
-      default: 
+      default:
         ; // Do nothing.
     }
 
@@ -420,8 +438,8 @@ static void statement() {
     whileStatement();
   } else if (match(TOKEN_LEFT_BRACE)) {
       beginScope();
-      block(); 
-      endScope(); 
+      block();
+      endScope();
   } else {
     expressionStatement();
   }
@@ -460,7 +478,7 @@ static void or_(bool canAssign) {
 }
 
 static void string(bool canAssign) {
-  emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, 
+  emitConstant(OBJ_VAL(copyString(parser.previous.start + 1,
                                   parser.previous.length - 2)));
 }
 
@@ -565,11 +583,11 @@ static void parsePrecedence(Precedence precedence) {
 
   if (canAssign && match(TOKEN_EQUAL)) {
     error("Invalid assignment target.");
-  }  
+  }
 }
 
 static uint8_t identifierConstant(Token* name) {
-  return makeConstant(OBJ_VAL(copyString(name->start, 
+  return makeConstant(OBJ_VAL(copyString(name->start,
                                          name->length)));
 }
 
@@ -607,7 +625,7 @@ static void declareVariable() {
   // globals are late bound, no tracking of declarations
   if (current->scopeDepth == 0) return;
 
-  Token* name = &parser.previous; 
+  Token* name = &parser.previous;
 
   for (int i = current->localCount - 1; i >= 0; i--) {
     Local* local = &current->locals[i];
@@ -634,7 +652,7 @@ static uint8_t parseVariable(const char* errorMessage) {
 }
 
 static void markInitialized() {
-  current->locals[current->localCount - 1].depth = 
+  current->locals[current->localCount - 1].depth =
       current->scopeDepth;
 }
 
@@ -652,13 +670,11 @@ static ParseRule* getRule(TokenType type) {
   return &rules[type];
 }
 
-bool compile(const char* source, Chunk* chunk) {
+ObjFunction* compile(const char* source) {
   initScanner(source);
 
-  Compiler compiler; 
-  initCompiler(&compiler);
-
-  compilingChunk = chunk;
+  Compiler compiler;
+  initCompiler(&compiler, TYPE_SCRIPT);
 
   parser.hadError = false;
   parser.panicMode = false;
@@ -669,7 +685,7 @@ bool compile(const char* source, Chunk* chunk) {
     declaration();
   }
 
-  endCompiler();
-  return !parser.hadError;
+  ObjFunction* function = endCompiler();
+  return parser.hadError ? NULL : function;
 }
 
