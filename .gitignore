@@ -11,3 +11,6 @@ cmake-build-debug
 *.gch
 
 clox/*clox
+
+*~
+.*~
