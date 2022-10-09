@@ -8,7 +8,7 @@
 #include "debug.h"
 #include "vm.h"
 
-/* 
+/*
   2022-08-30
     - 24.3.3 | The call stack
 
@@ -38,7 +38,7 @@ static void repl() {
   char line[1024];
   for (;;) {
     printf("> ");
-    
+
     if (!fgets(line, sizeof(line), stdin)) {
       printf("\n");
       break;
@@ -54,7 +54,7 @@ static char* readFile(const char* path) {
     fprintf(stderr, "Could not open file \"%s\".\n", path);
     exit(74);
   }
-  
+
   fseek(file, 0L, SEEK_END);
   size_t fileSize = ftell(file);
   rewind(file);
