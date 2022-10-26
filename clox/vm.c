@@ -178,7 +178,7 @@ static void concatenate() {
   chars[length] = '\0';
 
   ObjString* result = takeString(chars, length);
-  
+
   pop();
   pop();
   push(OBJ_VAL(result));
@@ -366,10 +366,10 @@ static InterpretResult run() {
         closeUpvalues(vm.stackTop - 1);
         pop();
         break;
-	      }
+      }
       case OP_RETURN: {
         Value result = pop();
-	closeUpvalues(frame->slots);
+        closeUpvalues(frame->slots);
         vm.frameCount--;
         if (vm.frameCount == 0) {
               pop();
@@ -379,6 +379,10 @@ static InterpretResult run() {
         vm.stackTop = frame->slots;
         push(result);
         frame = &vm.frames[vm.frameCount - 1];
+        break;
+      }
+      case OP_CLASS: {
+        push(OBJ_VAL(newClass(READ_STRING())));
         break;
       }
     }
