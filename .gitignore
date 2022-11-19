@@ -1,16 +1,12 @@
+.idea
 .vscode
 
-.idea
+clox
 cmake-build-debug
 
-*.obj
 *.exe
-
-*.o
-*.out
 *.gch
-
-clox/*clox
-
+*.o
+*.obj
+*.out
 *~
-.*~
