@@ -16,6 +16,7 @@ class Cruller < Doughnut {
     }
 }
 
-Doughnut().cook();
-Cruller().cook();
-
+Doughnut().cook(); // expect: Dunk in the fryer.
+// expect: Finish with sprinkles
+Cruller().cook(); // expect: Dunk in the fryer.
+// expect: Finish with icing

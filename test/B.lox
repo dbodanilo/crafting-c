@@ -11,4 +11,4 @@ class B < A {
     }
 }
 
-B().method();  // Prints "A".
+B().method();  // expect: A
