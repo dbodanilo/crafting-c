@@ -53,7 +53,7 @@ static void defineNative(const char* name, NativeFn function) {
   pop();
 }
 
-void initVM() {
+bool initVM() {
   resetStack();
   vm.objects = NULL;
   vm.bytesAllocated = 0;
@@ -70,6 +70,8 @@ void initVM() {
   vm.initString = copyString("init", 4);
 
   defineNative("clock", clockNative);
+
+  return true;
 }
 
 void freeVM() {
@@ -548,8 +550,8 @@ static InterpretResult run() {
 #undef READ_BYTE
 }
 
-InterpretResult interpret(const char* source) {
-  ObjFunction* function = compile(source);
+InterpretResult interpret(const char* source, size_t len) {
+  ObjFunction* function = compile(source, len);
   if (function == NULL) return INTERPRET_COMPILE_ERROR;
 
   push(OBJ_VAL(function));

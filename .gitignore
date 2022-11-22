@@ -1,12 +1,18 @@
 .idea
 .vscode
 
-clox*
+build
 cmake-build-debug
+log
+
+c*lox*
+crash*
+
+*~
+*corpus
 
 *.exe
 *.gch
 *.o
 *.obj
 *.out
-*~

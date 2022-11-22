@@ -16,9 +16,12 @@ endif
 
 CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 
+CFLAGS_FUZZER := $(CFLAGS) -g -fsanitize=address,fuzzer
+SOURCE_FUZZER:= $(SOURCE_DIR)/fuzz_vm.cc
+
 # Mode configuration.
 ifeq ($(MODE),debug)
-	CFLAGS += -O0 -DDEBUG -g
+	CFLAGS += -O0 -DDEBUG -g -fsanitize=address,fuzzer-no-link -fsanitize-address-use-after-scope
 	BUILD_DIR := build/debug
 else
 	CFLAGS += -O3 -flto
@@ -32,11 +35,24 @@ OBJECTS := $(addprefix $(BUILD_DIR)/$(NAME)/, $(notdir $(SOURCES:.c=.o)))
 
 # Targets ---
 
+default: build/$(NAME) build/$(NAME).a build/$(NAME)-fuzzer
+
+# Link as a library
+build/$(NAME).a: $(OBJECTS)
+	@ printf "%8s %-40s %s\n" ar rcs $@
+	@ mkdir -p build
+	@ ar rcs $@ $^
+
 # Link the interpreter.
 build/$(NAME): $(OBJECTS)
 	@ printf "%8s %-40s %s\n" $(CC) $@ "$(CFLAGS)"
 	@ mkdir -p build
 	@ $(CC) $(CFLAGS) $^ -o $@
+
+build/$(NAME)-fuzzer: $(SOURCE_FUZZER) build/$(NAME).a
+	@ printf "%8s %-40s %s\n" $(CC) $@ "$(CFLAGS_FUZZER)"
+	@ mkdir -p build
+	@ $(CC) $(CFLAGS_FUZZER) $(SOURCE_FUZZER) build/$(NAME).a -o $@
 
 # Compile object files.
 $(BUILD_DIR)/$(NAME)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)

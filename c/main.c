@@ -8,6 +8,8 @@
 #include "debug.h"
 #include "vm.h"
 
+#define SIZEOF_LINE 1024
+
 /*
   2022-08-30
     - 24.3.3 | The call stack
@@ -35,16 +37,16 @@
 */
 
 static void repl() {
-  char line[1024];
+  char line[SIZEOF_LINE];
   for (;;) {
     printf("> ");
 
-    if (!fgets(line, sizeof(line), stdin)) {
+    if (!fgets(line, SIZEOF_LINE, stdin)) {
       printf("\n");
       break;
     }
 
-    interpret(line);
+    interpret(line, SIZEOF_LINE);
   }
 }
 
@@ -79,7 +81,8 @@ static char* readFile(const char* path) {
 
 static void runFile(const char* path) {
   char* source = readFile(path);
-  InterpretResult result = interpret(source);
+  size_t len = strlen(source);
+  InterpretResult result = interpret(source, len);
   free(source);
 
   if (result == INTERPRET_COMPILE_ERROR) exit(65);

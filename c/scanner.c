@@ -8,14 +8,20 @@ typedef struct {
   const char* start;
   const char* current;
   int line;
+
+  size_t length;
+  size_t index;
 } Scanner;
 
 Scanner scanner;
 
-void initScanner(const char* source) {
+void initScanner(const char* source, size_t len) {
   scanner.start = source;
   scanner.current = source;
   scanner.line = 1;
+
+  scanner.length = len;
+  scanner.index = 0;
 }
 
 static bool isAlpha(char c) {
@@ -29,16 +35,17 @@ static bool isDigit(char c) {
 }
 
 static bool isAtEnd() {
-  return *scanner.current == '\0';
+  return (scanner.index + 1 >= scanner.length) || *scanner.current == '\0';
 }
 
 static char advance() {
   scanner.current++;
+  scanner.index++;
   return scanner.current[-1];
 }
 
 static char peek() {
-  return *scanner.current;
+  return isAtEnd() ? '\0' : *scanner.current;
 }
 
 static char peekNext() {
@@ -50,6 +57,7 @@ static bool match(char expected) {
   if (isAtEnd()) return false;
   if (*scanner.current != expected) return false;
   scanner.current++;
+  scanner.index++;
   return true;
 }
 
