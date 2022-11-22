@@ -1,0 +1,67 @@
+#
+# AFL dictionary for Lox
+# ----------------------
+#
+# Contains basic reserved keywords and syntax building blocks.
+#
+# Based on AFL dictionary for JavaScript
+# (Created by Michal Zalewski <lcamtuf@google.com>)
+# and AFL dictionary for Lua
+# (Taken from https://www.lua.org/manual/5.3/)
+#
+# Created by Danilo Bizarria <unifdaoliveira@fei.edu.br>
+#
+
+# keywords
+keyword_and="and"
+keyword_class="class"
+keyword_else="else"
+keyword_for="for"
+keyword_fun="fun"
+keyword_if="if"
+keyword_or="or"
+keyword_print="print"
+keyword_return="return"
+keyword_super="super"
+keyword_this="this"
+keyword_var="var"
+keyword_while="while"
+
+# misc
+misc_1=" 1"
+misc_a="a"
+misc_a_plus_b="a+b"
+misc_assign=" a=1"
+misc_empty_block"{}"
+misc_fn=" a()"
+misc_init=" init()"
+misc_clock=" clock()"
+misc_parentheses_1=" (1)"
+misc_parentheses_1x4=" (1,1,1,1)"
+misc_parentheses_a=" (a)"
+misc_semicolon=" ;"
+misc_string=" 'a'"
+
+# objects
+object_false=" false"
+object_nil=" nil"
+object_true=" true"
+
+# snippets
+snippet_for="for (a=0;a<2;a=a+1)"
+
+# functions
+fun_clock=" clock"
+fun_init=" init"
+
+# operators
+op_comment_line" //"
+op_bang=" !"
+op_comma=" ,"
+op_div=" /"
+op_equal=" ="
+op_equal_equal=" =="
+op_minus=" -"
+op_parentheses=" ()"
+op_period="."
+op_plus=" +"
